@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClipMe — Clipboard extension app for macOS</title>
+  <meta name="description" content="ClipMe is a clipboard extension app for macOS. Universal build for Apple silicon and Intel. Free and open source." />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ClipMe — Clipboard extension app for macOS" />
+  <meta property="og:description" content="Clipboard history, snippets and shortcuts for macOS. Universal build for Apple silicon and Intel." />
+  <meta property="og:image" content="./assets/clipme_logo.png" />
+
+  <link rel="icon" type="image/png" href="./assets/clipme_logo.png" />
+
+  <style>
+    :root {
+      --blue: #1b5fd0;
+      --blue-dark: #1447a3;
+      --green: #0e3d2b;
+      --green-soft: #14563c;
+      --ink: #1b1f24;
+      --muted: #5b6472;
+      --line: #e6e8ec;
+      --bg: #ffffff;
+      --bg-soft: #f5f6f8;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(20, 30, 50, 0.08);
+      --shadow-lg: 0 24px 60px rgba(20, 30, 50, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    header.nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.2px; }
+    .brand .b { color: var(--blue); }
+    .brand .m { color: var(--green); }
+    .nav-links { display: flex; gap: 22px; font-size: 15px; }
+    .nav-links a { color: var(--muted); font-weight: 500; }
+    .nav-links a:hover { color: var(--ink); text-decoration: none; }
+    @media (max-width: 620px) { .nav-links { display: none; } }
+
+    /* Hero */
+    .hero {
+      background:
+        radial-gradient(1200px 500px at 50% -10%, rgba(27,95,208,0.08), transparent 60%),
+        linear-gradient(180deg, #fbfcfe 0%, #ffffff 100%);
+      padding: 72px 0 56px;
+      text-align: center;
+      border-bottom: 1px solid var(--line);
+    }
+    .logo-card {
+      width: 200px; height: 200px; margin: 0 auto 28px;
+      border-radius: 28px; overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .logo-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    h1 { font-size: 44px; line-height: 1.1; margin: 0 0 12px; letter-spacing: -1px; }
+    .tagline { font-size: 20px; color: var(--muted); margin: 0 auto 28px; max-width: 560px; }
+
+    .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 13px 26px; border-radius: 12px; font-size: 16px; font-weight: 600;
+      transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .btn:hover { text-decoration: none; transform: translateY(-1px); }
+    .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 8px 20px rgba(27,95,208,0.28); }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .req { font-size: 14px; color: var(--muted); margin-top: 6px; }
+    .req strong { color: var(--green-soft); }
+
+    /* Sections */
+    section { padding: 64px 0; }
+    section.alt { background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    h2 { font-size: 30px; letter-spacing: -0.5px; margin: 0 0 8px; }
+    .section-sub { color: var(--muted); margin: 0 0 32px; font-size: 17px; }
+
+    /* Feature grid */
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 24px; box-shadow: var(--shadow);
+    }
+    .card h3 { margin: 0 0 6px; font-size: 18px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+    .ic { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; margin-bottom: 14px;
+          background: linear-gradient(135deg, rgba(27,95,208,0.12), rgba(14,61,43,0.12)); font-size: 22px; }
+
+    /* Prose */
+    .prose p { color: #33393f; }
+    .prose ul { color: #33393f; padding-left: 20px; }
+    .prose li { margin-bottom: 8px; }
+    .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+    .steps li { position: relative; padding: 0 0 14px 44px; color: #33393f; }
+    .steps li::before {
+      counter-increment: step; content: counter(step);
+      position: absolute; left: 0; top: 0;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--green); color: #fff; font-weight: 700; font-size: 14px;
+      display: grid; place-items: center;
+    }
+    code { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: 13px; }
+
+    /* Credits */
+    .credit-box {
+      background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 28px; box-shadow: var(--shadow); border-left: 4px solid var(--green);
+    }
+    .credit-box h3 { margin-top: 0; }
+
+    /* Callout */
+    .note {
+      background: rgba(27,95,208,0.06); border: 1px solid rgba(27,95,208,0.20);
+      border-radius: 12px; padding: 16px 18px; color: #2a3138; font-size: 15px;
+    }
+
+    footer { padding: 40px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; text-align: center; }
+    footer a { color: var(--muted); }
+    footer .brand { justify-content: center; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       NOTE: Replace the placeholder links below with your own:
+         - GITHUB repo:     https://github.com/your-org/ClipMe
+         - Download/release: https://github.com/your-org/ClipMe/releases/latest
+       ========================================================= -->
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand"><span class="b">Clip</span><span class="m">Me</span></div>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+        <a href="#build">Build</a>
+        <a href="#credits">Credits</a>
+        <a href="https://github.com/your-org/ClipMe">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap">
+        <div class="logo-card">
+          <img src="./assets/clipme_logo.png" alt="ClipMe logo" />
+        </div>
+        <h1>ClipMe</h1>
+        <p class="tagline">A clipboard extension app for macOS — keep your clipboard history, snippets and shortcuts one keystroke away.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="https://github.com/your-org/ClipMe/releases/latest">
+            &#8681;&nbsp; Download for macOS
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/your-org/ClipMe">View on GitHub</a>
+        </div>
+        <p class="req">Free &amp; open source · Requires <strong>macOS 13 Ventura or later</strong> · Universal build (Apple silicon &amp; Intel)</p>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+      <div class="wrap">
+        <h2>Everything on your clipboard, instantly</h2>
+        <p class="section-sub">Lightweight, native, and out of your way in the menu bar.</p>
+        <div class="grid">
+          <div class="card">
+            <div class="ic">&#128203;</div>
+            <h3>Clipboard history</h3>
+            <p>Automatically keeps what you copy so you can paste anything from earlier — text and images.</p>
+          </div>
+          <div class="card">
+            <div class="ic">&#9986;&#65039;</div>
+            <h3>Snippets</h3>
+            <p>Save reusable text snippets in folders and paste them from the menu in a click.</p>
+          </div>
+          <div class="card">
+            <div class="ic">&#9000;&#65039;</div>
+            <h3>Global shortcuts</h3>
+            <p>Open history, snippets and the main menu with customizable keyboard shortcuts.</p>
+          </div>
+          <div class="card">
+            <div class="ic">&#128421;&#65039;</div>
+            <h3>Menu bar app</h3>
+            <p>Runs quietly in the menu bar with a small footprint and no dock icon.</p>
+          </div>
+          <div class="card">
+            <div class="ic">&#128274;</div>
+            <h3>Private by design</h3>
+            <p>Clipboard contents stay on your Mac. You control analytics and crash reporting.</p>
+          </div>
+          <div class="card">
+            <div class="ic">&#9889;</div>
+            <h3>Native &amp; universal</h3>
+            <p>Runs natively on Apple silicon and Intel Macs — no Rosetta required.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About / README -->
+    <section id="about" class="alt">
+      <div class="wrap prose">
+        <h2>About ClipMe</h2>
+        <p class="section-sub">Straight from the README.</p>
+        <p>
+          ClipMe is a clipboard extension app for macOS. It lives in your menu bar and remembers
+          your clipboard history, lets you organize reusable snippets, and gives you quick keyboard
+          shortcuts to paste anything you have copied.
+        </p>
+        <p>
+          ClipMe is an independent, open-source fork of
+          <a href="https://github.com/Clipy/Clipy">Clipy</a> (which is itself based on
+          <a href="https://github.com/naotaka/ClipMenu">ClipMenu</a>), distributed under the MIT License.
+        </p>
+        <div class="note">
+          <strong>Universal build.</strong> ClipMe ships as a Universal&nbsp;2 binary and runs natively on
+          both Apple silicon (arm64, M1 or later) and Intel (x86_64) Macs, so no Rosetta translation is
+          required on Apple chips while Intel Macs remain fully supported.
+        </div>
+      </div>
+    </section>
+
+    <!-- Download -->
+    <section id="download">
+      <div class="wrap" style="text-align:center;">
+        <h2>Download ClipMe</h2>
+        <p class="section-sub">Grab the latest release, or build it yourself from source.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="https://github.com/your-org/ClipMe/releases/latest">
+            &#8681;&nbsp; Download the latest release
+          </a>
+          <a class="btn btn-ghost" href="#build">Build from source</a>
+        </div>
+        <p class="req">macOS 13 Ventura or later · Universal (Apple silicon &amp; Intel)</p>
+      </div>
+    </section>
+
+    <!-- Build -->
+    <section id="build" class="alt">
+      <div class="wrap prose">
+        <h2>Build from source</h2>
+        <p class="section-sub">Development environment: macOS 26 Tahoe · Xcode 26.5</p>
+        <ol class="steps">
+          <li>Open <code>ClipMe.xcodeproj</code> in Xcode.</li>
+          <li>Switch to ad-hoc signing: open <code>Configurations/CodeSigning.xcconfig</code> and uncomment
+              <code>#include "Configurations/CodeSigning-AdHoc.xcconfig"</code>.</li>
+          <li>Build and run the <code>ClipMe</code> scheme.</li>
+        </ol>
+        <p style="margin-top:18px;">
+          Firebase is optional — add your own <code>GoogleService-Info.plist</code> in
+          <code>ClipMe/GoogleService</code>, or skip it for local builds. See
+          <a href="https://github.com/your-org/ClipMe">the repository</a> for full instructions and the
+          <a href="https://github.com/your-org/ClipMe/blob/main/PRIVACY.md">privacy policy</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- Credits / Attribution -->
+    <section id="credits">
+      <div class="wrap">
+        <h2>Credits &amp; attribution</h2>
+        <p class="section-sub">ClipMe stands on the shoulders of the projects it is built from.</p>
+        <div class="credit-box prose">
+          <h3>Thank you to the author of Clipy</h3>
+          <p>
+            ClipMe is a fork of <a href="https://github.com/Clipy/Clipy"><strong>Clipy</strong></a>,
+            created by <strong>Shunsuke Furubayashi</strong> and the
+            <a href="https://github.com/Clipy">Clipy&nbsp;Project</a>. The vast majority of ClipMe's
+            functionality comes from their work, and this project would not exist without it.
+            Clipy is released under the MIT License.
+          </p>
+          <p style="margin-bottom:0;">
+            Clipy itself is based on <a href="https://github.com/naotaka/ClipMenu"><strong>ClipMenu</strong></a>
+            by <strong>Naotaka Morimoto</strong> (© 2008–2014), also under the MIT License. Sincere thanks to
+            both authors for publishing their work as open source.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="brand"><span class="b">Clip</span><span class="m">Me</span></div>
+      <p>
+        ClipMe is open source under the MIT License · Based on
+        <a href="https://github.com/Clipy/Clipy">Clipy</a> (© Clipy Project) and
+        <a href="https://github.com/naotaka/ClipMenu">ClipMenu</a> (© Naotaka Morimoto).
+      </p>
+      <p>&copy; <span id="year"></span> ClipMe. Not affiliated with the Clipy Project.</p>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
